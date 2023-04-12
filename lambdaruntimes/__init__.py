@@ -24,9 +24,9 @@ class LambdaRuntimes():
         self.validate_ssl = validate_ssl
         self.lambda_runtime_docs_url = lambda_runtime_docs_url if lambda_runtime_docs_url is not None else self.lambda_runtime_docs_url
 
-        self.populate_lambda_runtime_lists()
+        self.__populate_lambda_runtime_lists()
 
-    def process_current_runtimes(self, table):
+    def __process_current_runtimes(self, table):
         self.logger.info("Processing Current Runtimes Table")
         data = []
         processed_data = []
@@ -53,7 +53,7 @@ class LambdaRuntimes():
         
         return processed_data
     
-    def process_expired_runtimes(self, table):
+    def __process_expired_runtimes(self, table):
         self.logger.info("Processing Expired Runtimes Table")
         data = []
         processed_data = []
@@ -80,7 +80,7 @@ class LambdaRuntimes():
         
         return processed_data
 
-    def populate_lambda_runtime_lists(self):
+    def __populate_lambda_runtime_lists(self):
         lambda_runtimes_response = requests.get(self.lambda_runtime_docs_url, verify=self.validate_ssl)
         
         if not lambda_runtimes_response.ok:
@@ -97,20 +97,30 @@ class LambdaRuntimes():
         for table in tables:
             table_title = table.css.select_one('.title').get_text()
             if table_title == self.current_runtimes_title:
-                self.runtimes.extend(self.process_current_runtimes(table))
+                self.runtimes.extend(self.__process_current_runtimes(table))
             elif table_title == self.expired_runtimes_title:
-                self.runtimes.extend(self.process_expired_runtimes(table))
+                self.runtimes.extend(self.__process_expired_runtimes(table))
             else:
                 self.logger.warn("Unknown Table: {}".format(table_title))
 
-    def get_runtime(self, runtime_key):
+    def get_runtime(self, runtime_key) -> dict:
+        """
+        Gets a single runtime from the list by the runtime key.
+
+        get_runtime("nodejs") -> dict
+        """
         for runtime in self.runtimes:
             if runtime.get('runtime_key') == runtime_key:
                 return runtime
             
         return None
     
-    def runtime_is_expiring(self, runtime_key):
+    def runtime_is_expiring(self, runtime_key) -> bool:
+        """
+        Gets a boolean for whether the runtime has a defined deprecation date.
+
+        runtime_is_expiring("nodejs") -> True
+        """
         for runtime in self.runtimes:
             if runtime.get('runtime_key') == runtime_key:
                 return runtime.get('runtime_is_expiring')
@@ -118,6 +128,11 @@ class LambdaRuntimes():
         return None
     
     def runtime_is_expired(self, runtime_key):
+        """
+        Gets a boolean for whether the runtime has passed its deprecation date.
+
+        runtime_is_expired("nodejs") -> True
+        """
         for runtime in self.runtimes:
             if runtime.get('runtime_key') == runtime_key:
                 return runtime.get('runtime_expired')
