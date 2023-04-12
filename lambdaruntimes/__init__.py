@@ -2,6 +2,20 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 from dateutil import parser
+from datetime import datetime
+from typing import Optional, List
+from pydantic import BaseModel, validator
+
+class LambdaRuntime(BaseModel):
+    name: str
+    identifier: str
+    sdk: Optional[str]
+    os: str
+    arch: Optional[str]
+    deprecation_phase_1: Optional[datetime] = None
+    deprecation_phase_2: Optional[datetime] = None
+    runtime_is_expiring: bool
+    runtime_is_expired: bool
 
 class LambdaRuntimes():
 
@@ -18,7 +32,7 @@ class LambdaRuntimes():
     # Internal storage
     expired_runtimes_title = "Deprecated runtimes"
     current_runtimes_title = "Supported Runtimes"
-    runtimes = []
+    runtimes: List[LambdaRuntime] = []
 
     def __init__(self, validate_ssl = True, lambda_runtime_docs_url = None):
         self.validate_ssl = validate_ssl
@@ -34,20 +48,21 @@ class LambdaRuntimes():
         rows = table.find_all('tr')
         for row in rows:
             columns = row.find_all('td')
-            column_data = [cell.text.strip() for cell in columns]
-            data.append([cell for cell in column_data])
+            data.append([cell.text.strip() for cell in columns])
 
         for row in data:
             if len(row) == 0:
                 continue
-            processed_data.append({
-                "runtime_name": row[0],
-                "runtime_key": row[1],
-                "runtime_deprecation": parser.parse(row[5]) if row[5] else None,
-                "runtime_expiry": None,
-                "runtime_is_expiring": True if row[5] else False,
-                "runtime_expired": False
-            })
+
+            processed_data.append(LambdaRuntime(name=row[0], 
+                                                identifier=row[1],
+                                                sdk=row[2],
+                                                os=row[3],
+                                                arch=row[4],
+                                                deprecation_phase_1=parser.parse(row[5]) if row[5] else None,
+                                                deprecation_phase_2=None,
+                                                runtime_is_expiring=True if row[5] else False,
+                                                runtime_is_expired=False))
 
         self.logger.debug(processed_data)
         
@@ -61,20 +76,21 @@ class LambdaRuntimes():
         rows = table.find_all('tr')
         for row in rows:
             columns = row.find_all('td')
-            column_data = [cell.text.strip() for cell in columns]
-            data.append([cell for cell in column_data])
+            data.append([cell.text.strip() for cell in columns])
 
         for row in data:
             if len(row) == 0:
                 continue
-            processed_data.append({
-                "runtime_name": row[0],
-                "runtime_key": row[1],
-                "runtime_deprecation": parser.parse(row[3]) if row[3] else parser.parse(row[4]),
-                "runtime_expiry": parser.parse(row[4]),
-                "runtime_is_expiring": True,
-                "runtime_expired": True
-            })
+
+            processed_data.append(LambdaRuntime(name=row[0], 
+                                                identifier=row[1],
+                                                sdk=None,
+                                                os=row[2],
+                                                arch=None,
+                                                deprecation_phase_1=parser.parse(row[3]) if row[3] else parser.parse(row[4]),
+                                                deprecation_phase_2=parser.parse(row[4]),
+                                                runtime_is_expiring=True,
+                                                runtime_is_expired=True))
 
         self.logger.debug(processed_data)
         
@@ -106,14 +122,14 @@ class LambdaRuntimes():
     def __iter__(self):
         return iter(self.runtimes)
 
-    def get_runtime(self, runtime_key) -> dict:
+    def get_runtime(self, runtime_key) -> LambdaRuntime:
         """
         Gets a single runtime from the list by the runtime key.
 
-        get_runtime("nodejs") -> dict
+        get_runtime("nodejs") -> LambdaRuntime
         """
         for runtime in self.runtimes:
-            if runtime.get('runtime_key') == runtime_key:
+            if runtime.identifier == runtime_key:
                 return runtime
             
         return None
@@ -125,8 +141,8 @@ class LambdaRuntimes():
         runtime_is_expiring("nodejs") -> True
         """
         for runtime in self.runtimes:
-            if runtime.get('runtime_key') == runtime_key:
-                return runtime.get('runtime_is_expiring')
+            if runtime.identifier == runtime_key:
+                return runtime.runtime_is_expiring
         
         return None
     
@@ -137,7 +153,7 @@ class LambdaRuntimes():
         runtime_is_expired("nodejs") -> True
         """
         for runtime in self.runtimes:
-            if runtime.get('runtime_key') == runtime_key:
-                return runtime.get('runtime_expired')
+            if runtime.identifier == runtime_key:
+                return runtime.runtime_is_expired
         
         return None
