@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import logging
+from dateutil import parser
 
 class LambdaRuntimes():
 
@@ -42,7 +43,7 @@ class LambdaRuntimes():
             processed_data.append({
                 "runtime_name": row[0],
                 "runtime_key": row[1],
-                "runtime_deprecation": row[5] if row[5] else None,
+                "runtime_deprecation": parser.parse(row[5]) if row[5] else None,
                 "runtime_expiry": None,
                 "runtime_is_expiring": True if row[5] else False,
                 "runtime_expired": False
@@ -69,8 +70,8 @@ class LambdaRuntimes():
             processed_data.append({
                 "runtime_name": row[0],
                 "runtime_key": row[1],
-                "runtime_deprecation": row[3] if row[3] else row[4],
-                "runtime_expiry": row[4],
+                "runtime_deprecation": parser.parse(row[3]) if row[3] else parser.parse(row[4]),
+                "runtime_expiry": parser.parse(row[4]),
                 "runtime_is_expiring": True,
                 "runtime_expired": True
             })
