@@ -8,6 +8,8 @@ Install the requirements with `pip3 install -r requirements.txt`
 
 ### Basic Usage
 
+The LambdaRuntimes library implements a list of LambdaRuntimes fetched from the AWS documentation website. Internally, it is just a list of results parsed from the tables on the Lambda runtimes page with some helper functions to make working with them easier.
+
 Import the library at the top of your python file and create an instance of the `LambdaRuntimes` class. This fetches a list of the runtimes from the AWS docs page.
 
 ```python
@@ -32,6 +34,8 @@ runtimes = LambdaRuntimes()
 for runtime in runtimes:
     print(runtime)
 ```
+
+You can also directly access the `runtimes` property of the instance, and iterate over it instead.
 
 #### Getting a Single Runtime
 
@@ -58,4 +62,24 @@ You can query if a runtime has expired by its identifier using the `runtime_is_e
 ```python
 runtimes.runtime_is_expired("nodejs")
 >>> True
+```
+
+## The LambdaRuntime Data Class
+
+The iterables and functions in the library mostly return instances of the `LambdaRuntime` class. This data class has fields that reflect the data on the AWS documentation website.
+
+This data class is made with Pydantic and so type hints should work in your IDE of choice.
+
+Each instance will have at least the following properties:
+
+```python
+name: str
+identifier: str
+sdk: Optional[str]
+os: str
+arch: Optional[str]
+deprecation_phase_1: Optional[datetime] = None
+deprecation_phase_2: Optional[datetime] = None
+runtime_is_expiring: bool
+runtime_is_expired: bool
 ```
