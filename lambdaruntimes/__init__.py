@@ -103,6 +103,9 @@ class LambdaRuntimes():
             else:
                 self.logger.warn("Unknown Table: {}".format(table_title))
 
+    def __iter__(self):
+        return iter(self.runtimes)
+
     def get_runtime(self, runtime_key) -> dict:
         """
         Gets a single runtime from the list by the runtime key.
