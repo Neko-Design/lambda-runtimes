@@ -54,15 +54,16 @@ class LambdaRuntimes():
             if len(row) == 0:
                 continue
 
-            processed_data.append(LambdaRuntime(name=row[0], 
-                                                identifier=row[1],
-                                                sdk=row[2],
-                                                os=row[3],
-                                                arch=row[4],
-                                                deprecation_phase_1=parser.parse(row[5]) if row[5] else None,
-                                                deprecation_phase_2=None,
-                                                runtime_is_expiring=True if row[5] else False,
-                                                runtime_is_expired=False))
+            processed_data.append(LambdaRuntime(
+                name=row[0], 
+                identifier=row[1],
+                sdk=row[2],
+                os=row[3],
+                arch=row[4],
+                deprecation_phase_1=parser.parse(row[5]) if row[5] else None,
+                deprecation_phase_2=None,
+                runtime_is_expiring=True if row[5] else False,
+                runtime_is_expired=False))
 
         self.logger.debug(processed_data)
         
@@ -82,15 +83,16 @@ class LambdaRuntimes():
             if len(row) == 0:
                 continue
 
-            processed_data.append(LambdaRuntime(name=row[0], 
-                                                identifier=row[1],
-                                                sdk=None,
-                                                os=row[2],
-                                                arch=None,
-                                                deprecation_phase_1=parser.parse(row[3]) if row[3] else parser.parse(row[4]),
-                                                deprecation_phase_2=parser.parse(row[4]),
-                                                runtime_is_expiring=True,
-                                                runtime_is_expired=True))
+            processed_data.append(LambdaRuntime(
+                name=row[0], 
+                identifier=row[1],
+                sdk=None,
+                os=row[2],
+                arch=None,
+                deprecation_phase_1=parser.parse(row[3]) if row[3] else parser.parse(row[4]),
+                deprecation_phase_2=parser.parse(row[4]),
+                runtime_is_expiring=True,
+                runtime_is_expired=True))
 
         self.logger.debug(processed_data)
         
