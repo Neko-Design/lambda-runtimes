@@ -99,6 +99,7 @@ class LambdaRuntimes():
         return processed_data
 
     def __populate_lambda_runtime_lists(self):
+        self.runtimes.clear()
         lambda_runtimes_response = requests.get(self.lambda_runtime_docs_url, verify=self.validate_ssl)
         
         if not lambda_runtimes_response.ok:
