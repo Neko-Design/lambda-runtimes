@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lambda-runtimes"
+
+version = "0.0.1"
+
+authors = [
+  { name="Ewen McCahon", email="hi@ewenmccahon.me" },
+]
+
+description = "Scrapes Lambda Runtime Info from Amazon's Docs"
+
+readme = "README.md"
+
+requires-python = ">=3.7"
+
+dependencies = [
+    "requests",
+    "beautifulsoup4",
+    "python-dateutil",
+    "pydantic"
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Neko-Design/lambda-runtimes"
+"Bug Tracker" = "https://github.com/Neko-Design/lambda-runtimes/issues"
