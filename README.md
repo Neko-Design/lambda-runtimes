@@ -4,7 +4,11 @@ Python library for getting a list of all Lambda runtimes from AWS's documentatio
 
 ## Usage
 
-Install the requirements with `pip3 install -r requirements.txt`
+You can install the `lambda-runtimes` package from PyPI with pip:
+
+```pip3 install lambda-runtimes```
+
+or clone this repository and install the requirements with `pip3 install -r requirements.txt`
 
 ### Basic Usage
 
