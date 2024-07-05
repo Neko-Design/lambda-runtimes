@@ -89,8 +89,8 @@ class LambdaRuntimes():
                 sdk=None,
                 os=row[2],
                 arch=None,
-                deprecation_phase_1=parser.parse(row[3]) if row[3] else parser.parse(row[4]),
-                deprecation_phase_2=parser.parse(row[4]),
+                deprecation_phase_1=parser.parse(row[3]) if row[3] else None,
+                deprecation_phase_2=parser.parse(row[4]) if row[4] else None,
                 runtime_is_expiring=True,
                 runtime_is_expired=True))
 
