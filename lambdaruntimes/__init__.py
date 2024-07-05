@@ -89,8 +89,8 @@ class LambdaRuntimes():
                 sdk=None,
                 os=row[2],
                 arch=None,
-                deprecation_phase_1=parser.parse(row[3]) if row[3] else parser.parse(row[4]),
-                deprecation_phase_2=parser.parse(row[4]),
+                deprecation_phase_1=parser.parse(row[3]) if row[3] else None,
+                deprecation_phase_2=parser.parse(row[4]) if row[4] else None,
                 runtime_is_expiring=True,
                 runtime_is_expired=True))
 
@@ -114,7 +114,7 @@ class LambdaRuntimes():
         tables = soup.find_all('table')
 
         for table in tables:
-            table_title = table.css.select_one('.title').get_text()
+            table_title = table.css.select_one('.title').get_text() if table.css.select_one('.title') else "Unknown"
             if table_title == self.current_runtimes_title:
                 self.runtimes.extend(self.__process_current_runtimes(table))
             elif table_title == self.expired_runtimes_title:
