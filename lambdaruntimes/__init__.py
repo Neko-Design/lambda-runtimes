@@ -114,7 +114,7 @@ class LambdaRuntimes():
         tables = soup.find_all('table')
 
         for table in tables:
-            table_title = table.css.select_one('.title').get_text()
+            table_title = table.css.select_one('.title').get_text() if table.css.select_one('.title') else "Unknown"
             if table_title == self.current_runtimes_title:
                 self.runtimes.extend(self.__process_current_runtimes(table))
             elif table_title == self.expired_runtimes_title:
