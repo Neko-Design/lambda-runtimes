@@ -9,15 +9,18 @@ from pydantic import BaseModel, validator
 class LambdaRuntime(BaseModel):
     name: str
     identifier: str
-    sdk: Optional[str]
     os: str
-    arch: Optional[str]
     deprecation_phase_1: Optional[datetime] = None
     deprecation_phase_2: Optional[datetime] = None
     runtime_is_expiring: bool
     runtime_is_expired: bool
+    
+    def __str__(self):
+        return f"{self.name} ({self.identifier}) - Deprecation Phase 1: {self.deprecation_phase_1}, Deprecation Phase 2: {self.deprecation_phase_2}"
 
 class LambdaRuntimes():
+
+    NOT_SCHEDULED = "Not scheduled"
 
     # Logger configuration
     logging.basicConfig(level=logging.INFO)
@@ -31,7 +34,7 @@ class LambdaRuntimes():
 
     # Internal storage
     expired_runtimes_title = "Deprecated runtimes"
-    current_runtimes_title = "Supported Runtimes"
+    current_runtimes_title = "Supported runtimes"
     runtimes: List[LambdaRuntime] = []
 
     def __init__(self, validate_ssl = True, lambda_runtime_docs_url = None):
@@ -57,12 +60,10 @@ class LambdaRuntimes():
             processed_data.append(LambdaRuntime(
                 name=row[0], 
                 identifier=row[1],
-                sdk=row[2],
-                os=row[3],
-                arch=row[4],
-                deprecation_phase_1=parser.parse(row[5]) if row[5] else None,
-                deprecation_phase_2=None,
-                runtime_is_expiring=True if row[5] else False,
+                os=row[2],
+                deprecation_phase_1=parser.parse(row[3]) if row[3] not in [self.NOT_SCHEDULED, "N/A"] else None,
+                deprecation_phase_2=parser.parse(row[4]) if row[4] not in [self.NOT_SCHEDULED, "N/A"] else None,
+                runtime_is_expiring=True if row[3] != self.NOT_SCHEDULED else False,
                 runtime_is_expired=False))
 
         self.logger.debug(processed_data)
@@ -86,11 +87,9 @@ class LambdaRuntimes():
             processed_data.append(LambdaRuntime(
                 name=row[0], 
                 identifier=row[1],
-                sdk=None,
                 os=row[2],
-                arch=None,
-                deprecation_phase_1=parser.parse(row[3]) if row[3] else None,
-                deprecation_phase_2=parser.parse(row[4]) if row[4] else None,
+                deprecation_phase_1=parser.parse(row[3]) if row[3] not in [self.NOT_SCHEDULED, "N/A"] else None,
+                deprecation_phase_2=parser.parse(row[4]) if row[4] not in [self.NOT_SCHEDULED, "N/A"] else None,
                 runtime_is_expiring=True,
                 runtime_is_expired=True))
 
@@ -111,16 +110,10 @@ class LambdaRuntimes():
 
         soup = BeautifulSoup(lambda_runtimes_webpage_text, 'html.parser')
 
-        tables = soup.find_all('table')
-
-        for table in tables:
-            table_title = table.css.select_one('.title').get_text() if table.css.select_one('.title') else "Unknown"
-            if table_title == self.current_runtimes_title:
-                self.runtimes.extend(self.__process_current_runtimes(table))
-            elif table_title == self.expired_runtimes_title:
-                self.runtimes.extend(self.__process_expired_runtimes(table))
-            else:
-                self.logger.warn("Unknown Table: {}".format(table_title))
+        current_runtime_table = soup.find('h2', text=self.current_runtimes_title).find_next('table')
+        self.runtimes.extend(self.__process_current_runtimes(current_runtime_table))
+        expired_runtime_table = soup.find('h2', text=self.expired_runtimes_title).find_next('table')
+        self.runtimes.extend(self.__process_expired_runtimes(expired_runtime_table))
 
     def __iter__(self):
         return iter(self.runtimes)
