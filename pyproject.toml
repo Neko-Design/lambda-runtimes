@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lambda-runtimes"
 
-version = "0.0.2"
+version = "0.0.3"
 
 authors = [
   { name="Ewen McCahon", email="hi@ewenmccahon.me" },
